@@ -1,0 +1,14 @@
+MODE	SIZE	DISPLAY
+Accumulator	0	
+Implied	0	
+Immediate	1	#%p
+Zero Page	1	%p
+Zero Page X Indexed	1	%p,X
+Zero Page Y Indexed	1	%p,Y
+Indirect X Indexed	1	(%p,X)
+Indirect Y Indexed	1	(%p),Y
+Relative	1	%p
+Absolute	2	%p
+Absolute X Indexed	2	%p,X
+Absolute Y Indexed	2	%p,Y
+Indirect	2	(%p)
