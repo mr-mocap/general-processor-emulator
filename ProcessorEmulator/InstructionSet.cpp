@@ -22,7 +22,7 @@ namespace
     using namespace std::literals;
 
 
-    const std::filesystem::path DataDirectory{ "DataFiles/InstructionSet/6502" };
+    const std::filesystem::path DataDirectory{ std::filesystem::path("DataFiles") / "InstructionSet" / "6502" };
     const std::filesystem::path InstructionFileName{ "Instruction" };
     const std::filesystem::path ParameterFileName{ "Parameter" };
     const std::string_view      DefaultInstructionDisplayTemplate{ "%m" };
