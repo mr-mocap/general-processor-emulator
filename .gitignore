@@ -39,3 +39,6 @@
 
 # debug information files
 *.dwo
+/ProcessorEmulator/.vs
+/ProcessorEmulator/out/build/x64-debug
+/.vs
