@@ -43,4 +43,14 @@ Examples:
     X -> Y
     A -> Data
 
-These should be obvious, so I won't go into detailed explanation here.
+These should be obvious, so I won't go into detailed explanation here.  Representing a value in memory
+is denoted by prepending a '*' to the register which contains the memory address.
+
+Examples:
+
+    Data -> *Address
+    *Address -> Data
+
+The first line will write the value of the Data register into the address currently contained in the
+Address register.  This is a basic memory write.  The second line does the opposite, fetches a value
+from memory and stores it in the Data register.
