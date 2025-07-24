@@ -22,6 +22,7 @@ a register name follwed by a ':' and then a bit width for the register.
         Address : 16
         Data : 8
         ProgramCounter : 16
+        Status : 8
     }
 
 ### Micro-Op Language
@@ -90,28 +91,34 @@ There will be a way to call a functions and use its results.
 There will be various functions available to perform various computations.
 
 * Specifying Which Bits in a Value to Refer To
-    * choose_bits( register_name, number_of_bits, which_group )
+    * choose( register_name, number_of_bits, which_group )
 * One's Complement
-    * flip_bits( bitset )
+    * flip( bitset )
 * Set Bits
-    * set_bits( bitset )
+    * set( bitset )
 * Clear Bits
-    * clear_bits( bitset )
+    * clear( bitset )
 * AND Bits
-    * and_bits( bitset_left, bitset_right )
+    * and( bitset_left, bitset_right )
 * OR Bits
-    * or_bits( bitset_left, bitset_right )
+    * or( bitset_left, bitset_right )
 * Equals
-    * equals_bits( bitset_left, bitset_right )
+    * equals( bitset_left, bitset_right )
 * Not Equals
-    * not_equals_bits( bitset_left, bitset_right )
+    * not_equals( bitset_left, bitset_right )
 * Shift Left
-    * left_shift_bits( bitset )
+    * left_shift( bitset )
 * Shift Right
-    * right_shift_bits( bitset )
+    * right_shift( bitset )
 * Increment
     * increment( bitset )
 * Decrement
     * decrement( bitset )
 * Add
     * add( bitset_left, bitset_right )
+* Memory Read
+    * memory_read( memory_address, value )
+* Memory Write
+    * memory_write( memory_address, value )
+* Copy Bits
+    * copy_to( origin_bitset, destination_bitset )
