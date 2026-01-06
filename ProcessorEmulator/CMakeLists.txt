@@ -9,6 +9,10 @@ set(TEST_REGISTERSET_SRC "${CMAKE_SOURCE_DIR}/test_registerset.cpp")
 set(TEST_REGISTERSET_EXE "${CMAKE_BINARY_DIR}/test_registerset")
 set(TEST_REGISTERSET_PASS_FILE "${CMAKE_BINARY_DIR}/test_registerset.pass")
 
+set(TEST_INSTRUCTIONSET_SRC "${CMAKE_SOURCE_DIR}/test_instructionset.cpp")
+set(TEST_INSTRUCTIONSET_EXE "${CMAKE_BINARY_DIR}/test_instructionset")
+set(TEST_INSTRUCTIONSET_PASS_FILE "${CMAKE_BINARY_DIR}/test_instructionset.pass")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_EXTENSIONS OFF)
@@ -23,6 +27,7 @@ endif()
 
 # Add unit tests
 add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.hpp" "RegisterSet.cpp")
+add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.hpp" "InstructionSet.cpp")
 
 # Add source to this project's executable.
 add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "ProcessorEmulator.h" "InstructionSet.cpp")
@@ -35,6 +40,13 @@ add_custom_command(
 	DEPENDS ${TEST_REGISTERSET_EXE}
 	COMMENT "Running RegisterSet unit tests"
 )
-
 add_custom_target(run_test_registerset ALL DEPENDS ${TEST_REGISTERSET_PASS_FILE})
+
+add_custom_command(
+	OUTPUT ${TEST_INSTRUCTIONSET_PASS_FILE}
+	COMMAND ${TEST_INSTRUCTIONSET_EXE} && ${CMAKE_COMMAND} -E touch ${TEST_INSTRUCTIONSET_PASS_FILE}
+	DEPENDS ${TEST_INSTRUCTIONSET_EXE}
+	COMMENT "Running InstructionSet unit tests"
+)
+add_custom_target(run_test_instructionset ALL DEPENDS ${TEST_INSTRUCTIONSET_PASS_FILE})
 
