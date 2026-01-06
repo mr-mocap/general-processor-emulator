@@ -42,3 +42,19 @@
 /ProcessorEmulator/.vs
 /ProcessorEmulator/out/build/x64-debug
 /.vs
+
+# Misc VSCode Items
+launch.json
+settings.json
+tasks.json
+
+# Misc Other
+*.swp
+
+# CMake build artifacts
+ProcessorEmulator/build
+
+# Project Items
+*.pass
+test_*
+!test_*.cpp

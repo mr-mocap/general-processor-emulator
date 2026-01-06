@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <functional>
 #include <charconv>
+#include <cstring>
+#include <format>
 
 namespace
 {
