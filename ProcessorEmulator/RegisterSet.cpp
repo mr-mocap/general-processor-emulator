@@ -7,12 +7,12 @@ bool RegisterSet::empty() const
     return _registers.empty();
 
 }
-std::optional<Register> RegisterSet::retrieveRegister(std::string_view name) const
+RegisterSet::const_lookup_t RegisterSet::retrieveRegister(std::string_view name) const
 {
     auto found = _registers.find( name );
 
     if ( found == _registers.end() )
         return std::nullopt;
     
-    return std::make_optional( found->second );
+    return std::make_optional( std::ref(found->second) );
 }

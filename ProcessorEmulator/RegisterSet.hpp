@@ -33,6 +33,8 @@ struct Register
 class RegisterSet
 {
 public:
+    using const_lookup_t = std::optional<std::reference_wrapper<const Register>>;
+
     RegisterSet() = default;
     
     template <std::ranges::range RangeType>
@@ -44,7 +46,7 @@ public:
 
     bool empty() const;
 
-    std::optional<Register> retrieveRegister(std::string_view name) const;
+    const_lookup_t retrieveRegister(std::string_view name) const;
 protected:
     /** Use the "is_transparent" functionality to allow string_view to be used without constructing a temporary */
     struct StringTransparentLess
