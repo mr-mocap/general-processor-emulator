@@ -7,6 +7,7 @@
 #include <optional>
 #include <utility>
 #include <span>
+#include <functional>
 
 
 class InstructionSet
@@ -17,8 +18,8 @@ public:
     {
         Instruction() = default;
         explicit Instruction(size_t o,
-            const std::string &mn,
-            const std::string &mo)
+                             std::string_view mn,
+                             std::string_view mo)
             :
             opcode(o),
             mnemonic(mn),
@@ -26,9 +27,9 @@ public:
         {
         }
         explicit Instruction(size_t o,
-            const std::string &mn,
-            const std::string &mo,
-            const std::string &d)
+                             std::string_view mn,
+                             std::string_view mo,
+                             std::string_view d)
             :
             opcode(o),
             mnemonic(mn),
@@ -46,16 +47,16 @@ public:
     struct Parameter
     {
         Parameter() = default;
-        explicit Parameter(size_t  s,
-            const std::string &m)
+        explicit Parameter(size_t           s,
+                           std::string_view m)
             :
             mode{ m },
             size{ s }
         {
         }
-        explicit Parameter(size_t  s,
-            const std::string &m,
-            const std::string &d)
+        explicit Parameter(size_t           s,
+                           std::string_view m,
+                           std::string_view d)
             :
             mode{ m },
             size{ s },
@@ -68,11 +69,14 @@ public:
         std::string  display;
     };
 
+    using ConstInstructionRef = std::reference_wrapper<const Instruction>;
+    using ConstParameterRef   = std::reference_wrapper<const Parameter>;
+
     void fetch();
 
     std::string disassemble(const std::span<std::byte> input_instruction) const;
 
-    std::optional<std::pair<Instruction, Parameter>> retrieveInstructionData(uint8_t opcode) const;
+    std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> retrieveInstructionData(uint8_t opcode) const;
 protected:
     std::map<std::string, Parameter> _parameters;
     std::map<size_t, Instruction>    _instructions;

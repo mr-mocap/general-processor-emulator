@@ -329,7 +329,7 @@ std::string InstructionSet::disassemble(const std::span<std::byte> input_instruc
     return Decode(input_instruction, instruction_data.value().first, instruction_data.value().second, entire_instruction_display);
 }
 
-std::optional<std::pair<InstructionSet::Instruction, InstructionSet::Parameter>> InstructionSet::retrieveInstructionData(uint8_t opcode) const
+std::optional<std::pair<InstructionSet::ConstInstructionRef, InstructionSet::ConstParameterRef>> InstructionSet::retrieveInstructionData(uint8_t opcode) const
 {
     const auto instruction_iter = _instructions.find(opcode);
 
@@ -342,5 +342,5 @@ std::optional<std::pair<InstructionSet::Instruction, InstructionSet::Parameter>>
     if ( parameter_iter == _parameters.end() )
         return std::nullopt;
 
-    return std::make_optional(std::make_pair(i, parameter_iter->second));
+    return std::make_optional( std::make_pair( std::ref(i), std::ref(parameter_iter->second) ) );
 }
