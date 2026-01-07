@@ -27,10 +27,10 @@ endif()
 
 # Add unit tests
 add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.hpp" "RegisterSet.cpp")
-add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.hpp" "InstructionSet.cpp")
+add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "IO.hpp" "IO.cpp" "InstructionSet.hpp" "InstructionSet.cpp")
 
 # Add source to this project's executable.
-add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "ProcessorEmulator.h" "InstructionSet.cpp")
+add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "ProcessorEmulator.h" "IO.hpp" "IO.cpp" "InstructionSet.hpp" "InstructionSet.cpp")
 
 # TODO: Add tests and install targets if needed.
 

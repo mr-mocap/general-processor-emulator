@@ -1,5 +1,7 @@
 #include "IO.hpp"
 #include <filesystem>
+#include <fstream>
+#include <charconv>
 
 
 static const std::filesystem::path DataDirectory{ std::filesystem::path("DataFiles") / "InstructionSet" / "6502" };
