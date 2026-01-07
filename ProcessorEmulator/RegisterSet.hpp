@@ -49,31 +49,5 @@ public:
     const_lookup_t retrieveRegister(std::string_view name) const;
 protected:
     /** Use the "is_transparent" functionality to allow string_view to be used without constructing a temporary */
-    struct StringTransparentLess
-    {
-        using value_type = std::string;
-        using is_transparent = void;
-
-        bool operator()(std::string_view lhs, std::string_view rhs) const noexcept
-        {
-            return lhs < rhs;
-        }
-
-        bool operator()(const std::string &lhs, const std::string &rhs) const noexcept
-        {
-            return lhs < rhs;
-        }
-
-        bool operator()(std::string_view lhs, const std::string &rhs) const noexcept
-        {
-            return lhs < rhs;
-        }
-
-        bool operator()(const std::string &lhs, std::string_view rhs) const noexcept
-        {
-            return lhs < rhs;
-        }
-    };
-
-    std::map<std::string, Register, StringTransparentLess> _registers;
+    std::map<std::string, Register, std::less<>> _registers;
 };
