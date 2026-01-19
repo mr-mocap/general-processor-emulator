@@ -36,7 +36,7 @@ endif()
 add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.cpp")
 add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.cpp")
 add_executable (test_conversions "${TEST_CONVERSIONS_SRC}" "Conversions.cpp")
-add_executable (test_io "${TEST_CONVERSIONS_SRC}" "IO.cpp" "Conversions.cpp")
+add_executable (test_io "${TEST_IO_SRC}" "IO.cpp" "Conversions.cpp")
 
 # Add source to this project's executable.
 add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp")

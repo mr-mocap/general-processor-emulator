@@ -4,7 +4,7 @@
 #include <sstream>
 
 
-namespace BreakLine
+namespace BreakLineTests
 {
 
 void EmptyInputProducesEmptyVector()
@@ -25,21 +25,21 @@ void OneWordProducesVectorWithOneEntry()
         std::vector<std::string> result = BreakLine( "word " );
 
         assert( result.size() == 1);
-        assert( result[0] == "word" );
+        assert( result[0] == "word " );
     }
 
     {
         std::vector<std::string> result = BreakLine( " word" );
 
         assert( result.size() == 1);
-        assert( result[0] == "word" );
+        assert( result[0] == " word" );
     }
 
     {
         std::vector<std::string> result = BreakLine( " word " );
 
         assert( result.size() == 1);
-        assert( result[0] == "word" );
+        assert( result[0] == " word " );
     }
 
     {
@@ -52,27 +52,70 @@ void OneWordProducesVectorWithOneEntry()
     {
         std::vector<std::string> result = BreakLine( "\tword" );
 
-        assert( result.size() == 1);
-        assert( result[0] == "word" );
+        assert( result.size() == 2);
+        assert( result[0].empty() );
+        assert( result[1] == "word" );
     }
 
+    // 
     {
         std::vector<std::string> result = BreakLine( "\tword\t" );
 
-        assert( result.size() == 1);
-        assert( result[0] == "word" );
+        assert( result.size() == 2);
+        assert( result[0].empty() );
+        assert( result[1] == "word" );
     }
 }
 
-void Test()
+void TrimsFinalTabs()
+{
+    {
+        std::vector<std::string> result = BreakLine( "word\t" );
+
+        assert( result.size() == 1);
+        assert( result[1] == "word" );
+    }
+
+    {
+        std::vector<std::string> result = BreakLine( "word\t\t" );
+
+        assert( result.size() == 1);
+        assert( result[1] == "word" );
+    }
+}
+
+void OneVectorEntryPerWordOfInput()
+{
+    {
+        std::vector<std::string> result = BreakLine( "word\tword2\t1234\tabc123\t1,000" );
+
+        assert( result.size() == 5);
+        assert( result[0] == "word" );
+        assert( result[1] == "word2" );
+        assert( result[2] == "1234" );
+        assert( result[3] == "abc123" );
+        assert( result[4] == "1,000" );
+    }
+    {
+        std::vector<std::string> result = BreakLine( "word\t\tword2" );
+
+        assert( result.size() == 3);
+        assert( result[0] == "word" );
+        assert( result[1].empty() );
+        assert( result[2] == "word2" );
+    }
+}
+
+void Run()
 {
     EmptyInputProducesEmptyVector();
     OneWordProducesVectorWithOneEntry();
+    OneVectorEntryPerWordOfInput();
 }
 
 }
 
-namespace ReadLine
+namespace ReadLineTests
 {
 
 void OneLineWithOneWordProducesVectorWithOneEntry()
@@ -95,7 +138,7 @@ void OneVectorEntryPerLineFromInput()
         std::vector<std::string> result = ReadLine( input );
 
         assert( result.size() == 1 );
-        assert( result[0] == buffer );
+        assert( result[0] == "ThisIsOneLine" );
     }
 
     {
@@ -133,7 +176,7 @@ void ReadingPastEndProducesAnEmptyVector()
     std::vector<std::string> result = ReadLine( input );
 
     assert( result.size() == 1 );
-    assert( result[0] == buffer );
+    assert( result[0] == "ThisIsOneLine" );
 
     result = ReadLine( input );
 
@@ -144,7 +187,7 @@ void ReadingPastEndProducesAnEmptyVector()
     assert( result.empty() );
 }
 
-void Test()
+void Run()
 {
     OneLineWithOneWordProducesVectorWithOneEntry();
     OneVectorEntryPerLineFromInput();
@@ -155,7 +198,7 @@ void Test()
 
 int main(void)
 {
-    BreakLine::Test();
-    ReadLine::Test();
+    BreakLineTests::Run();
+    ReadLineTests::Run();
     return EXIT_SUCCESS;
 }
