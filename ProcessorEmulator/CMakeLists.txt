@@ -13,11 +13,18 @@ set(TEST_INSTRUCTIONSET_SRC "${CMAKE_SOURCE_DIR}/test_instructionset.cpp")
 set(TEST_INSTRUCTIONSET_EXE "${CMAKE_BINARY_DIR}/test_instructionset")
 set(TEST_INSTRUCTIONSET_PASS_FILE "${CMAKE_BINARY_DIR}/test_instructionset.pass")
 
+set(TEST_CONVERSIONS_SRC "${CMAKE_SOURCE_DIR}/test_conversions.cpp")
+set(TEST_CONVERSIONS_EXE "${CMAKE_BINARY_DIR}/test_conversions")
+set(TEST_CONVERSIONS_PASS_FILE "${CMAKE_BINARY_DIR}/test_conversions.pass")
+
+set(TEST_IO_SRC "${CMAKE_SOURCE_DIR}/test_io.cpp")
+set(TEST_IO_EXE "${CMAKE_BINARY_DIR}/test_io")
+set(TEST_IO_PASS_FILE "${CMAKE_BINARY_DIR}/test_io.pass")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_EXTENSIONS OFF)
 set(CMAKE_BUILD_TYPE Debug)
-
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -26,11 +33,13 @@ if (POLICY CMP0141)
 endif()
 
 # Add unit tests
-add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.hpp" "RegisterSet.cpp")
-add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "IO.hpp" "IO.cpp" "InstructionSet.hpp" "InstructionSet.cpp")
+add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.cpp")
+add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.cpp")
+add_executable (test_conversions "${TEST_CONVERSIONS_SRC}" "Conversions.cpp")
+add_executable (test_io "${TEST_CONVERSIONS_SRC}" "IO.cpp" "Conversions.cpp")
 
 # Add source to this project's executable.
-add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "ProcessorEmulator.h" "IO.hpp" "IO.cpp" "InstructionSet.hpp" "InstructionSet.cpp")
+add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -50,3 +59,18 @@ add_custom_command(
 )
 add_custom_target(run_test_instructionset ALL DEPENDS ${TEST_INSTRUCTIONSET_PASS_FILE})
 
+add_custom_command(
+	OUTPUT ${TEST_CONVERSIONS_PASS_FILE}
+	COMMAND ${TEST_CONVERSIONS_EXE} && ${CMAKE_COMMAND} -E touch ${TEST_CONVERSIONS_PASS_FILE}
+	DEPENDS ${TEST_CONVERSIONS_EXE}
+	COMMENT "Running Conversions unit tests"
+)
+add_custom_target(run_test_conversions ALL DEPENDS ${TEST_CONVERSIONS_PASS_FILE})
+
+add_custom_command(
+	OUTPUT ${TEST_IO_PASS_FILE}
+	COMMAND ${TEST_IO_EXE} && ${CMAKE_COMMAND} -E touch ${TEST_IO_PASS_FILE}
+	DEPENDS ${TEST_IO_EXE}
+	COMMENT "Running IO unit tests"
+)
+add_custom_target(run_test_io ALL DEPENDS ${TEST_IO_PASS_FILE})

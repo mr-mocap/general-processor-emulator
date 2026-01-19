@@ -1,5 +1,5 @@
 #include "InstructionSet.hpp"
-#include "IO.hpp"
+#include "Conversions.hpp"
 #include <fstream>
 #include <vector>
 #include <array>
@@ -157,18 +157,6 @@ namespace
 bool InstructionSet::empty() const
 {
     return _parameters.empty() && _instructions.empty();
-}
-
-void InstructionSet::fetch()
-{
-    std::vector<Parameter>   parameters = ReadParameters();
-    std::vector<Instruction> instructions = ReadInstructions();
-
-    for ( const Parameter &parameter : parameters )
-        _parameters[parameter.mode] = parameter;
-
-    for ( const Instruction &instruction : instructions )
-        _instructions[instruction.opcode] = instruction;
 }
 
 std::string InstructionSet::disassemble(const std::span<std::byte> input_instruction) const

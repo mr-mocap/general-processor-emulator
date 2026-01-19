@@ -16,6 +16,8 @@ std::vector<Instruction> ReadInstructions();
 
 std::vector<Parameter> ReadParameters();
 
+std::vector<std::string> TrimRight(std::vector<std::string> &&line);
+
 std::vector<std::string> ReadLine(std::istream &input);
 
 // Splits a string at tabs
@@ -26,15 +28,3 @@ bool CanMakeParameter(const std::vector<std::string> &row_values);
 
 Instruction ToInstruction(const std::vector<std::string> &row_values);
 Parameter   ToParameter  (const std::vector<std::string> &row_values);
-
-std::optional<size_t> DecimalStringToSizeT(const std::string &input);
-std::optional<size_t> HexStringToSizeT(const std::string &input);
-
-template <class BasicType>
-static constexpr BasicType To(std::span<const std::byte> bytes) requires(std::is_arithmetic_v<BasicType> || std::is_enum_v<BasicType>)
-{
-    BasicType result; // We do this for memory alignment of the variable type
-
-    std::memcpy(&result, bytes.data(), sizeof(BasicType));
-    return result;
-}

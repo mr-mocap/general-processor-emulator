@@ -90,8 +90,6 @@ public:
 
     bool empty() const;
 
-    void fetch();
-
     std::string disassemble(const std::span<std::byte> input_instruction) const;
 
     std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> retrieveInstructionData(uint8_t opcode) const;

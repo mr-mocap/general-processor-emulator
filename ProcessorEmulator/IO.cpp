@@ -1,55 +1,12 @@
 #include "IO.hpp"
+#include "Conversions.hpp"
 #include <filesystem>
 #include <fstream>
-#include <charconv>
 
 
-static const std::filesystem::path DataDirectory{ std::filesystem::path("DataFiles") / "InstructionSet" / "6502" };
+static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / "DataFiles" / "InstructionSet" / "6502" };
 static const std::filesystem::path InstructionFileName{ "Instruction" };
 static const std::filesystem::path ParameterFileName{ "Parameter" };
-
-
-std::optional<size_t> DecimalStringToSizeT(const std::string &input)
-{
-    size_t retval;
-
-    if ( std::from_chars(input.data(), input.data() + input.size(), retval).ec == std::errc{} )
-        return retval;
-
-    return std::nullopt;
-}
-
-std::optional<size_t> HexStringToSizeT(const std::string &input)
-{
-    size_t retval;
-
-    if ( std::from_chars(input.data(), input.data() + input.size(), retval, 16).ec == std::errc{} )
-        return retval;
-
-    return std::nullopt;
-}
-
-Instruction ToInstruction(const std::vector<std::string> &row_values)
-{
-    std::optional<size_t> s = HexStringToSizeT(row_values[0]);
-
-    if ( !s.has_value() )
-        return {};
-
-    return (row_values.size() == 4) ? Instruction{ s.value(), row_values[1], row_values[2], row_values[3] } :
-        Instruction{ s.value(), row_values[1], row_values[2] };
-}
-
-Parameter ToParameter(const std::vector<std::string> &row_values)
-{
-    std::optional<size_t> s = DecimalStringToSizeT(row_values[1]);
-
-    if ( !s.has_value() )
-        return {};
-
-    return (row_values.size() == 3) ? Parameter{ s.value(), row_values[0], row_values[2] } :
-        Parameter{ s.value(), row_values[0] };
-}
 
 bool CanMakeInstruction(const std::vector<std::string> &row_values)
 {
@@ -79,20 +36,23 @@ std::vector<std::string> BreakLine(std::string_view input)
     return retval;
 }
 
+std::vector<std::string> TrimRight(std::vector<std::string> &&line)
+{
+    if ( !line.empty() )
+    {
+        while ( line.back().empty() )
+            line.pop_back();
+    }
+    return line;
+}
+
 std::vector<std::string> ReadLine(std::istream &input)
 {
     std::string line;
 
     std::getline(input, line);
 
-    auto result = BreakLine(line);
-
-    if ( !result.empty() )
-    {
-        while ( result.back().empty() )
-            result.pop_back();
-    }
-    return result;
+    return TrimRight( BreakLine(line) );
 }
 
 std::vector<Instruction> ReadInstructions()
