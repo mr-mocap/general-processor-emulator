@@ -7,6 +7,7 @@
 static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / "DataFiles" / "InstructionSet" / "6502" };
 static const std::filesystem::path InstructionFileName{ "Instruction" };
 static const std::filesystem::path ParameterFileName{ "Parameter" };
+static const std::filesystem::path RegisterFileName{ "RegistersAssumedFromInstructionSet" };
 
 bool CanMakeInstruction(const std::vector<std::string> &row_values)
 {
@@ -15,6 +16,12 @@ bool CanMakeInstruction(const std::vector<std::string> &row_values)
 
 bool CanMakeParameter(const std::vector<std::string> &row_values)
 {
+    return (row_values.size() == 2) || (row_values.size() == 3);
+}
+
+bool CanMakeRegister(const std::vector<std::string> &row_values)
+{
+    // We need the NAME & BITS columns at least...
     return (row_values.size() == 2) || (row_values.size() == 3);
 }
 
@@ -69,7 +76,7 @@ std::vector<Instruction> ReadInstructions()
         while ( !(column_values = ReadLine(instruction_stream)).empty() )
         {
             if ( CanMakeInstruction(column_values) )
-                instructions.push_back(ToInstruction(column_values));
+                instructions.push_back( ToInstruction(column_values) );
         }
 
         return instructions;
@@ -92,10 +99,33 @@ std::vector<Parameter> ReadParameters()
         while ( !(column_values = ReadLine(parameter_stream)).empty() )
         {
             if ( CanMakeParameter(column_values) )
-                parameters.push_back(ToParameter(column_values));
+                parameters.push_back( ToParameter(column_values) );
         }
 
         return parameters;
+    }
+
+    return {};
+}
+
+std::vector<Register> ReadRegisters()
+{
+    std::ifstream register_stream;
+
+    register_stream.open(DataDirectory / RegisterFileName);
+    if ( register_stream.is_open() )
+    {
+        std::vector<Register> registers;
+        std::vector<std::string> column_values = ReadLine(register_stream);
+
+        // The first line we throw away
+        while ( !(column_values = ReadLine(register_stream)).empty() )
+        {
+            if ( CanMakeRegister(column_values) )
+                registers.push_back( ToRegister(column_values) );
+        }
+
+        return registers;
     }
 
     return {};

@@ -187,11 +187,35 @@ void ReadingPastEndProducesAnEmptyVector()
     assert( result.empty() );
 }
 
+void ReadInstructionsFromProjectReturnsCorrectData()
+{
+    std::vector<Instruction> instructions = ReadInstructions();
+
+    assert( instructions.size() == 151 );
+}
+
+void ReadParametersFromProjectReturnsCorrectData()
+{
+    std::vector<Parameter> parameters = ReadParameters();
+
+    assert( parameters.size() == 13 );
+}
+
+void ReadRegistersFromProjectReturnsCorrectData()
+{
+    std::vector<Register> registers = ReadRegisters();
+
+    assert( registers.size() == 6 );
+}
+
 void Run()
 {
     OneLineWithOneWordProducesVectorWithOneEntry();
     OneVectorEntryPerLineFromInput();
     ReadingPastEndProducesAnEmptyVector();
+    ReadInstructionsFromProjectReturnsCorrectData();
+    ReadParametersFromProjectReturnsCorrectData();
+    ReadRegistersFromProjectReturnsCorrectData();
 }
 
 }

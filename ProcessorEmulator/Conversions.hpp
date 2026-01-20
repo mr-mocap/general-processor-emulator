@@ -2,6 +2,7 @@
 
 #include "Concepts.hpp"
 #include "InstructionSet.hpp"
+#include "RegisterSet.hpp"
 #include <string>
 #include <string_view>
 #include <cstring>
@@ -14,6 +15,8 @@
 Parameter   ToParameter(const std::vector<std::string> &row_values);
 
 Instruction ToInstruction(const std::vector<std::string> &row_values);
+
+Register    ToRegister(const std::vector<std::string> &row_values);
 
 std::optional<size_t> DecimalStringToSizeT(std::string_view input);
 std::optional<size_t> HexStringToSizeT(std::string_view input);

@@ -14,11 +14,9 @@ void DefaultConstructed()
 void ConstructWithIterators()
 {
     std::vector<Register> registers{
-        {"A", 8, false, false},
-        {"X", 16, false, false},
-        {"Y", 8, true, false},
-        {"I", 8, false, true},
-        {"RO", 8, true, true}
+        {"A", 8, "Accumulator" },
+        {"X", 16, "X Register" },
+        {"Y", 8, "Y Register" }
     };
     RegisterSet rs( registers );
 
@@ -30,8 +28,7 @@ void ConstructWithIterators()
         assert(reg.has_value());
         assert(reg.value().get().name == "A");
         assert(reg.value().get().number_of_bits == 8);
-        assert(reg.value().get().internal == false);
-        assert(reg.value().get().read_only == false);
+        assert(reg.value().get().description == "Accumulator");
     }
 
     {
@@ -40,8 +37,7 @@ void ConstructWithIterators()
         assert(reg.has_value());
         assert(reg.value().get().name == "X");
         assert(reg.value().get().number_of_bits == 16);
-        assert(reg.value().get().internal == false);
-        assert(reg.value().get().read_only == false);
+        assert(reg.value().get().description == "X Register");
     }
 
     {
@@ -50,28 +46,7 @@ void ConstructWithIterators()
         assert(reg.has_value());
         assert(reg.value().get().name == "Y");
         assert(reg.value().get().number_of_bits == 8);
-        assert(reg.value().get().internal == true);
-        assert(reg.value().get().read_only == false);
-    }
-
-    {
-        RegisterSet::const_lookup_t reg = rs.retrieveRegister("I");
-
-        assert(reg.has_value());
-        assert(reg.value().get().name == "I");
-        assert(reg.value().get().number_of_bits == 8);
-        assert(reg.value().get().internal == false);
-        assert(reg.value().get().read_only == true);
-    }
-
-    {
-        RegisterSet::const_lookup_t reg = rs.retrieveRegister("RO");
-
-        assert(reg.has_value());
-        assert(reg.value().get().name == "RO");
-        assert(reg.value().get().number_of_bits == 8);
-        assert(reg.value().get().internal == true);
-        assert(reg.value().get().read_only == true);
+        assert(reg.value().get().description == "Y Register");
     }
 }
 

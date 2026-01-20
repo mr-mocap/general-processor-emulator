@@ -11,22 +11,26 @@
 struct Register
 {
     Register() = default;
-    Register(std::string_view n,
-             int              bits = 8,
-             bool             i = false,
-             bool             ro = false)
+    Register(std::string_view nm,
+             int              bits = 8)
         :
-        name(n),
-        number_of_bits(bits),
-        internal(i),
-        read_only(ro)
+        name(nm),
+        number_of_bits(bits)
+    {
+    }
+    Register(std::string_view nm,
+             int              bits,
+             std::string_view desc)
+        :
+        name(nm),
+        description(desc),
+        number_of_bits(bits)
     {
     }
 
     std::string name;
+    std::string description;
     int         number_of_bits = 8;
-    bool        internal  = false;
-    bool        read_only = false;
 };
 
 

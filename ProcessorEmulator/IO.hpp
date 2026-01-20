@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InstructionSet.hpp"
+#include "RegisterSet.hpp"
 #include <vector>
 #include <istream>
 #include <string>
@@ -15,6 +16,8 @@
 std::vector<Instruction> ReadInstructions();
 
 std::vector<Parameter> ReadParameters();
+
+std::vector<Register> ReadRegisters();
 
 std::vector<std::string> TrimRight(std::vector<std::string> &&line);
 
