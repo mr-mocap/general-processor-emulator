@@ -3,8 +3,12 @@
 #include <filesystem>
 #include <fstream>
 
-
+#if defined(WIN32) || defined(WIN64)
+static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / ".." / ".." / "DataFiles" / "InstructionSet" / "6502" };
+#else
 static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / "DataFiles" / "InstructionSet" / "6502" };
+#endif
+
 static const std::filesystem::path InstructionFileName{ "Instruction" };
 static const std::filesystem::path ParameterFileName{ "Parameter" };
 static const std::filesystem::path RegisterFileName{ "RegistersAssumedFromInstructionSet" };
@@ -65,8 +69,9 @@ std::vector<std::string> ReadLine(std::istream &input)
 std::vector<Instruction> ReadInstructions()
 {
     std::ifstream instruction_stream;
+    std::filesystem::path instruction_file_path = DataDirectory / InstructionFileName;
 
-    instruction_stream.open(DataDirectory / InstructionFileName);
+    instruction_stream.open( instruction_file_path );
     if ( instruction_stream.is_open() )
     {
         std::vector<Instruction> instructions;
