@@ -21,6 +21,7 @@ void ConstructWithIterators()
     RegisterSet rs( registers );
 
     assert(!rs.empty());
+    assert( rs.size() == registers.size() );
 
     {
         RegisterSet::const_lookup_t reg = rs.retrieveRegister("A");

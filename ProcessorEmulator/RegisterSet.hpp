@@ -50,6 +50,8 @@ public:
 
     bool empty() const;
 
+    std::size_t size() const { return _registers.size(); }
+
     const_lookup_t retrieveRegister(std::string_view name) const;
 protected:
     /** Use the "is_transparent" functionality to allow string_view to be used without constructing a temporary */
