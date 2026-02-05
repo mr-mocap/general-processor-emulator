@@ -22,7 +22,7 @@ std::optional<size_t> DecimalStringToSizeT(std::string_view input);
 std::optional<size_t> HexStringToSizeT(std::string_view input);
 
 template <Concept::BasicType T>
-static constexpr T To(std::span<const std::byte> bytes)
+constexpr T To(std::span<const std::byte> bytes)
 {
     T result; // We do this for memory alignment of the variable type
 
