@@ -8,7 +8,8 @@ using namespace std;
 
 int main()
 {
-    InstructionSet instruction_set( ReadParameters(), ReadInstructions() );
+    std::string processor = "6502";
+    InstructionSet instruction_set( ReadParameters( processor ), ReadInstructions( processor ) );
 
     std::byte instruction_test[] = { std::byte{1}, std::byte{32} };
 

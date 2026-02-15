@@ -4,14 +4,29 @@
 #include <fstream>
 
 #if defined(WIN32) || defined(WIN64)
-static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / ".." / ".." / "DataFiles" / "InstructionSet" / "6502" };
+static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / ".." / ".." / "DataFiles" / "InstructionSet" };
 #else
-static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / "DataFiles" / "InstructionSet" / "6502" };
+static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / "DataFiles" / "InstructionSet" };
 #endif
 
 static const std::filesystem::path InstructionFileName{ "Instruction" };
 static const std::filesystem::path ParameterFileName{ "Parameter" };
 static const std::filesystem::path RegisterFileName{ "RegistersAssumedFromInstructionSet" };
+
+std::filesystem::path InstructionSetPath(std::string_view processor_name)
+{
+    return DataDirectory / processor_name / InstructionFileName;
+}
+
+std::filesystem::path ParameterPath(std::string_view processor_name)
+{
+    return DataDirectory / processor_name / ParameterFileName;
+}
+
+std::filesystem::path RegisterPath(std::string_view processor_name)
+{
+    return DataDirectory / processor_name / RegisterFileName;
+}
 
 bool CanMakeInstruction(const std::vector<std::string> &row_values)
 {
@@ -66,10 +81,10 @@ std::vector<std::string> ReadLine(std::istream &input)
     return TrimRight( BreakLine(line) );
 }
 
-std::vector<Instruction> ReadInstructions()
+std::vector<Instruction> ReadInstructions(std::string_view processor_name)
 {
     std::ifstream instruction_stream;
-    std::filesystem::path instruction_file_path = DataDirectory / InstructionFileName;
+    std::filesystem::path instruction_file_path = InstructionSetPath(processor_name);
 
     instruction_stream.open( instruction_file_path );
     if ( instruction_stream.is_open() )
@@ -90,11 +105,12 @@ std::vector<Instruction> ReadInstructions()
     return {};
 }
 
-std::vector<Parameter> ReadParameters()
+std::vector<Parameter> ReadParameters(std::string_view processor_name)
 {
     std::ifstream parameter_stream;
+    std::filesystem::path parameter_file_path = ParameterPath(processor_name);
 
-    parameter_stream.open(DataDirectory / ParameterFileName);
+    parameter_stream.open( parameter_file_path );
     if ( parameter_stream.is_open() )
     {
         std::vector<Parameter> parameters;
@@ -113,11 +129,12 @@ std::vector<Parameter> ReadParameters()
     return {};
 }
 
-std::vector<Register> ReadRegisters()
+std::vector<Register> ReadRegisters(std::string_view processor_name)
 {
     std::ifstream register_stream;
+    std::filesystem::path register_file_path = RegisterPath(processor_name);
 
-    register_stream.open(DataDirectory / RegisterFileName);
+    register_stream.open( register_file_path );
     if ( register_stream.is_open() )
     {
         std::vector<Register> registers;

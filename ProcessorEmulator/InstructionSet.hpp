@@ -90,11 +90,10 @@ public:
 
     bool empty() const;
 
-    std::string disassemble(const std::span<std::byte> input_instruction) const;
+    std::string disassemble(std::span<const std::byte> input_instruction) const;
 
     std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> retrieveInstructionData(uint8_t opcode) const;
 protected:
     std::map<std::string, Parameter> _parameters;
     std::map<size_t, Instruction>    _instructions;
-
 };

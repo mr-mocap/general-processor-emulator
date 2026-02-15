@@ -14,11 +14,11 @@
 namespace
 {
 
-    std::string LookupOpcode(const Instruction &, const Parameter &, const std::span<std::byte>);
-    std::string LookupMnemonic(const Instruction &, const Parameter &, const std::span<std::byte>);
-    std::string LookupInstructionParameter(const Instruction &, const Parameter &, const std::span<std::byte>);
+    std::string LookupOpcode(const Instruction &, const Parameter &, std::span<const std::byte>);
+    std::string LookupMnemonic(const Instruction &, const Parameter &, std::span<const std::byte>);
+    std::string LookupInstructionParameter(const Instruction &, const Parameter &, std::span<const std::byte>);
 
-    using SubstitutionFunction_t = std::function<std::string(const Instruction &, const Parameter &, const std::span<std::byte>)>;
+    using SubstitutionFunction_t = std::function<std::string(const Instruction &, const Parameter &, std::span<const std::byte>)>;
     using SubstitutionMap_t      = std::map<std::string_view, SubstitutionFunction_t>;
 
     using namespace std::literals;
@@ -48,9 +48,9 @@ namespace
         return !instruction.display.empty();
     }
 
-    std::string LookupOpcode(const Instruction          &instruction,
-                             const Parameter            &parameter,
-                             const std::span<std::byte>  instruction_bytes)
+    std::string LookupOpcode(const Instruction                &instruction,
+                             const Parameter                  &parameter,
+                                   std::span<const std::byte>  instruction_bytes)
     {
 #if 1
         return std::format("{:x}", instruction.opcode);
@@ -71,19 +71,19 @@ namespace
 #endif
     }
 
-    std::string LookupMnemonic(const Instruction          &instruction,
-                               const Parameter            &parameter,
-                               const std::span<std::byte>  instruction_bytes)
+    std::string LookupMnemonic(const Instruction                &instruction,
+                               const Parameter                  &parameter,
+                                     std::span<const std::byte>  instruction_bytes)
     {
         return instruction.mnemonic;
     }
 
-    std::string LookupInstructionParameter(const Instruction          &instruction,
-                                           const Parameter            &parameter,
-                                           const std::span<std::byte>  instruction_bytes)
+    std::string LookupInstructionParameter(const Instruction                &instruction,
+                                           const Parameter                  &parameter,
+                                                 std::span<const std::byte>  instruction_bytes)
     {
 #if 1
-        const std::span<std::byte> parameter_bytes{ instruction_bytes.subspan(1) };
+        std::span<const std::byte> parameter_bytes{ instruction_bytes.subspan(1) };
 
         if ( parameter_bytes.size() != parameter.size )
             return {}; // ERROR
@@ -127,10 +127,10 @@ namespace
 #endif
     }
 
-    std::string Decode(const std::span<std::byte>  input,
-                       const Instruction          &instruction,
-                       const Parameter            &parameter,
-                             std::string           display_template)
+    std::string Decode(      std::span<const std::byte>  input,
+                       const Instruction                &instruction,
+                       const Parameter                  &parameter,
+                             std::string                 display_template)
     {
         std::size_t search_position = 0;
         std::vector<std::string> retval;
@@ -159,7 +159,7 @@ bool InstructionSet::empty() const
     return _parameters.empty() && _instructions.empty();
 }
 
-std::string InstructionSet::disassemble(const std::span<std::byte> input_instruction) const
+std::string InstructionSet::disassemble(std::span<const std::byte> input_instruction) const
 {
     if ( input_instruction.empty() )
         return {};

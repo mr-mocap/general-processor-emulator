@@ -11,13 +11,17 @@
 #include <cstring>
 #include <cstddef>
 #include <type_traits>
+#include <filesystem>
 
+std::filesystem::path InstructionSetPath(std::string_view processor_name);
+std::filesystem::path ParameterPath(std::string_view processor_name);
+std::filesystem::path RegisterPath(std::string_view processor_name);
 
-std::vector<Instruction> ReadInstructions();
+std::vector<Instruction> ReadInstructions(std::string_view processor_name);
 
-std::vector<Parameter> ReadParameters();
+std::vector<Parameter> ReadParameters(std::string_view processor_name);
 
-std::vector<Register> ReadRegisters();
+std::vector<Register> ReadRegisters(std::string_view processor_name);
 
 std::vector<std::string> TrimRight(std::vector<std::string> &&line);
 

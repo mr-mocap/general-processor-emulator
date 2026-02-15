@@ -189,21 +189,21 @@ void ReadingPastEndProducesAnEmptyVector()
 
 void ReadInstructionsFromProjectReturnsCorrectData()
 {
-    std::vector<Instruction> instructions = ReadInstructions();
+    std::vector<Instruction> instructions = ReadInstructions("6502");
 
     assert( instructions.size() == 151 );
 }
 
 void ReadParametersFromProjectReturnsCorrectData()
 {
-    std::vector<Parameter> parameters = ReadParameters();
+    std::vector<Parameter> parameters = ReadParameters("6502");
 
     assert( parameters.size() == 13 );
 }
 
 void ReadRegistersFromProjectReturnsCorrectData()
 {
-    std::vector<Register> registers = ReadRegisters();
+    std::vector<Register> registers = ReadRegisters("6502");
 
     assert( registers.size() == 6 );
 }
