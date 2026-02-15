@@ -41,4 +41,5 @@
 *.dwo
 /ProcessorEmulator/.vs
 /ProcessorEmulator/out/build/x64-debug
+/ProcessorEmulator/build
 /.vs
