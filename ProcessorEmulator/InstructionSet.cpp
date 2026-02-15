@@ -1,4 +1,5 @@
 #include "InstructionSet.hpp"
+#include "Conversions.hpp"
 #include <fstream>
 #include <vector>
 #include <array>
@@ -8,24 +9,22 @@
 #include <filesystem>
 #include <functional>
 #include <charconv>
+#include <format>
 
 namespace
 {
 
-    std::string LookupOpcode(const InstructionSet::Instruction &, const InstructionSet::Parameter &, const std::span<std::byte>);
-    std::string LookupMnemonic(const InstructionSet::Instruction &, const InstructionSet::Parameter &, const std::span<std::byte>);
-    std::string LookupInstructionParameter(const InstructionSet::Instruction &, const InstructionSet::Parameter &, const std::span<std::byte>);
+    std::string LookupOpcode(const Instruction &, const Parameter &, std::span<const std::byte>);
+    std::string LookupMnemonic(const Instruction &, const Parameter &, std::span<const std::byte>);
+    std::string LookupInstructionParameter(const Instruction &, const Parameter &, std::span<const std::byte>);
 
-    using SubstitutionFunction_t = std::function<std::string(const InstructionSet::Instruction &, const InstructionSet::Parameter &, const std::span<std::byte>)>;
-    using SubstitutionMap_t = std::map<std::string_view, SubstitutionFunction_t>;
+    using SubstitutionFunction_t = std::function<std::string(const Instruction &, const Parameter &, std::span<const std::byte>)>;
+    using SubstitutionMap_t      = std::map<std::string_view, SubstitutionFunction_t>;
 
     using namespace std::literals;
 
 
-    const std::filesystem::path DataDirectory{ std::filesystem::path("DataFiles") / "InstructionSet" / "6502" };
-    const std::filesystem::path InstructionFileName{ "Instruction" };
-    const std::filesystem::path ParameterFileName{ "Parameter" };
-    const std::string_view      DefaultInstructionDisplayTemplate{ "%m" };
+    const std::string_view  DefaultInstructionDisplayTemplate{ "%m" };
 
     const SubstitutionMap_t SubstitutionFlags{
                                                {"%o"sv, LookupOpcode},
@@ -33,149 +32,7 @@ namespace
                                                {"%p"sv, LookupInstructionParameter}
     };
 
-    template <class BasicType>
-    static constexpr BasicType To(std::span<const std::byte> bytes) requires(std::is_arithmetic_v<BasicType> || std::is_enum_v<BasicType>)
-    {
-        BasicType result; // We do this for memory alignment of the variable type
-
-        std::memcpy(&result, bytes.data(), sizeof(BasicType));
-        return result;
-    }
-
-    // Splits a string at tabs
-    std::vector<std::string> BreakLine(std::string_view input)
-    {
-        std::size_t final_position = 0;
-        std::vector<std::string> retval;
-
-        for ( std::pair<std::size_t, std::size_t> search_position = std::make_pair(0, 0);
-            (search_position.second = input.find('\t', search_position.first)) != std::string_view::npos;
-            search_position.first = search_position.second + 1, final_position = search_position.first
-            )
-        {
-            retval.push_back(std::string{ input.substr(search_position.first, search_position.second - search_position.first) });
-        }
-
-        if ( final_position < input.size() )
-            retval.push_back(std::string{ input.substr(final_position) });
-        return retval;
-    }
-
-    std::vector<std::string> ReadLine(std::istream &input)
-    {
-        std::string line;
-
-        std::getline(input, line);
-
-        auto result = BreakLine(line);
-
-        if ( !result.empty() )
-        {
-            while ( result.back().empty() )
-                result.pop_back();
-        }
-        return result;
-    }
-
-    bool CanMakeInstruction(const std::vector<std::string> &row_values)
-    {
-        return (row_values.size() == 3) || (row_values.size() == 4);
-    }
-
-    bool CanMakeParameter(const std::vector<std::string> &row_values)
-    {
-        return (row_values.size() == 2) || (row_values.size() == 3);
-    }
-
-    std::optional<size_t> DecimalStringToSizeT(const std::string &input)
-    {
-        size_t retval;
-
-        if ( std::from_chars(input.data(), input.data() + input.size(), retval).ec == std::errc{} )
-            return retval;
-
-        return std::nullopt;
-    }
-
-    std::optional<size_t> HexStringToSizeT(const std::string &input)
-    {
-        size_t retval;
-
-        if ( std::from_chars(input.data(), input.data() + input.size(), retval, 16).ec == std::errc{} )
-            return retval;
-
-        return std::nullopt;
-    }
-
-    InstructionSet::Instruction ToInstruction(const std::vector<std::string> &row_values)
-    {
-        std::optional<size_t> s = HexStringToSizeT(row_values[0]);
-
-        if ( !s.has_value() )
-            return {};
-
-        return (row_values.size() == 4) ? InstructionSet::Instruction{ s.value(), row_values[1], row_values[2], row_values[3] } :
-            InstructionSet::Instruction{ s.value(), row_values[1], row_values[2] };
-    }
-
-    InstructionSet::Parameter ToParameter(const std::vector<std::string> &row_values)
-    {
-        std::optional<size_t> s = DecimalStringToSizeT(row_values[1]);
-
-        if ( !s.has_value() )
-            return {};
-
-        return (row_values.size() == 3) ? InstructionSet::Parameter{ s.value(), row_values[0], row_values[2] } :
-            InstructionSet::Parameter{ s.value(), row_values[0] };
-    }
-
-    std::vector<InstructionSet::Instruction> ReadInstructions()
-    {
-        std::ifstream instruction_stream;
-
-        instruction_stream.open(DataDirectory / InstructionFileName);
-        if ( instruction_stream.is_open() )
-        {
-            std::vector<InstructionSet::Instruction> instructions;
-            std::vector<std::string> column_values = ReadLine(instruction_stream);
-
-            // The first line we throw away
-            while ( !(column_values = ReadLine(instruction_stream)).empty() )
-            {
-                if ( CanMakeInstruction(column_values) )
-                    instructions.push_back(ToInstruction(column_values));
-            }
-
-            return instructions;
-        }
-
-        return {};
-    }
-
-    std::vector<InstructionSet::Parameter> ReadParameters()
-    {
-        std::ifstream parameter_stream;
-
-        parameter_stream.open(DataDirectory / ParameterFileName);
-        if ( parameter_stream.is_open() )
-        {
-            std::vector<InstructionSet::Parameter> parameters;
-            std::vector<std::string> column_values = ReadLine(parameter_stream);
-
-            // The first line we throw away
-            while ( !(column_values = ReadLine(parameter_stream)).empty() )
-            {
-                if ( CanMakeParameter(column_values) )
-                    parameters.push_back(ToParameter(column_values));
-            }
-
-            return parameters;
-        }
-
-        return {};
-    }
-
-    std::string RetrieveDisplay(const InstructionSet::Instruction &instruction, const InstructionSet::Parameter &parameter)
+    std::string RetrieveDisplay(const Instruction &instruction, const Parameter &parameter)
     {
         if ( !parameter.display.empty() )
             return parameter.display;
@@ -183,7 +40,7 @@ namespace
         return instruction.display;
     }
 
-    bool HasDisplay(const InstructionSet::Instruction &instruction, const InstructionSet::Parameter &parameter)
+    bool HasDisplay(const Instruction &instruction, const Parameter &parameter)
     {
         if ( !parameter.display.empty() )
             return true;
@@ -191,9 +48,9 @@ namespace
         return !instruction.display.empty();
     }
 
-    std::string LookupOpcode(const InstructionSet::Instruction &instruction,
-        const InstructionSet::Parameter &parameter,
-        const std::span<std::byte>         instruction_bytes)
+    std::string LookupOpcode(const Instruction                &instruction,
+                             const Parameter                  &parameter,
+                                   std::span<const std::byte>  instruction_bytes)
     {
 #if 1
         return std::format("{:x}", instruction.opcode);
@@ -214,19 +71,19 @@ namespace
 #endif
     }
 
-    std::string LookupMnemonic(const InstructionSet::Instruction &instruction,
-        const InstructionSet::Parameter &parameter,
-        const std::span<std::byte>         instruction_bytes)
+    std::string LookupMnemonic(const Instruction                &instruction,
+                               const Parameter                  &parameter,
+                                     std::span<const std::byte>  instruction_bytes)
     {
         return instruction.mnemonic;
     }
 
-    std::string LookupInstructionParameter(const InstructionSet::Instruction &instruction,
-        const InstructionSet::Parameter &parameter,
-        const std::span<std::byte>         instruction_bytes)
+    std::string LookupInstructionParameter(const Instruction                &instruction,
+                                           const Parameter                  &parameter,
+                                                 std::span<const std::byte>  instruction_bytes)
     {
 #if 1
-        const std::span<std::byte> parameter_bytes{ instruction_bytes.subspan(1) };
+        std::span<const std::byte> parameter_bytes{ instruction_bytes.subspan(1) };
 
         if ( parameter_bytes.size() != parameter.size )
             return {}; // ERROR
@@ -270,10 +127,10 @@ namespace
 #endif
     }
 
-    std::string Decode(const std::span<std::byte>         input,
-        const InstructionSet::Instruction &instruction,
-        const InstructionSet::Parameter &parameter,
-        std::string                  display_template)
+    std::string Decode(      std::span<const std::byte>  input,
+                       const Instruction                &instruction,
+                       const Parameter                  &parameter,
+                             std::string                 display_template)
     {
         std::size_t search_position = 0;
         std::vector<std::string> retval;
@@ -297,19 +154,12 @@ namespace
 
 }
 
-void InstructionSet::fetch()
+bool InstructionSet::empty() const
 {
-    std::vector<InstructionSet::Parameter>   parameters = ReadParameters();
-    std::vector<InstructionSet::Instruction> instructions = ReadInstructions();
-
-    for ( const Parameter &parameter : parameters )
-        _parameters[parameter.mode] = parameter;
-
-    for ( const Instruction &instruction : instructions )
-        _instructions[instruction.opcode] = instruction;
+    return _parameters.empty() && _instructions.empty();
 }
 
-std::string InstructionSet::disassemble(const std::span<std::byte> input_instruction) const
+std::string InstructionSet::disassemble(std::span<const std::byte> input_instruction) const
 {
     if ( input_instruction.empty() )
         return {};
@@ -327,7 +177,7 @@ std::string InstructionSet::disassemble(const std::span<std::byte> input_instruc
     return Decode(input_instruction, instruction_data.value().first, instruction_data.value().second, entire_instruction_display);
 }
 
-std::optional<std::pair<InstructionSet::Instruction, InstructionSet::Parameter>> InstructionSet::retrieveInstructionData(uint8_t opcode) const
+std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> InstructionSet::retrieveInstructionData(uint8_t opcode) const
 {
     const auto instruction_iter = _instructions.find(opcode);
 
@@ -340,5 +190,5 @@ std::optional<std::pair<InstructionSet::Instruction, InstructionSet::Parameter>>
     if ( parameter_iter == _parameters.end() )
         return std::nullopt;
 
-    return std::make_optional(std::make_pair(i, parameter_iter->second));
+    return std::make_optional( std::make_pair( std::ref(i), std::ref(parameter_iter->second) ) );
 }

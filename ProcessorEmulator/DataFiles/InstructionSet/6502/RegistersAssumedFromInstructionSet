@@ -1,0 +1,7 @@
+NAME	BITS	DESCRIPTION
+A	8	Accumulator
+X	8	Secondary Register X
+Y	8	Secondary Register Y
+PC	16	Program Counter
+SP	8	Stack Pointer
+SR	8	Status Register

@@ -2,14 +2,14 @@
 //
 
 #include "ProcessorEmulator.h"
+#include "IO.hpp"
 
 using namespace std;
 
 int main()
 {
-    InstructionSet instruction_set;
-
-    instruction_set.fetch();
+    std::string processor = "6502";
+    InstructionSet instruction_set( ReadParameters( processor ), ReadInstructions( processor ) );
 
     std::byte instruction_test[] = { std::byte{1}, std::byte{32} };
 

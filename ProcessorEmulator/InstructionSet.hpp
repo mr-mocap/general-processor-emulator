@@ -7,74 +7,93 @@
 #include <optional>
 #include <utility>
 #include <span>
+#include <functional>
+#include <ranges>
+
+
+struct Instruction
+{
+    Instruction() = default;
+    Instruction(size_t o,
+                std::string_view mn,
+                std::string_view mo)
+        :
+        opcode(o),
+        mnemonic(mn),
+        mode(mo)
+    {
+    }
+    Instruction(size_t o,
+                std::string_view mn,
+                std::string_view mo,
+                std::string_view d)
+        :
+        opcode(o),
+        mnemonic(mn),
+        mode(mo),
+        display(d)
+    {
+    }
+
+    size_t       opcode = 0;
+    std::string  mnemonic;
+    std::string  mode;
+    std::string  display;
+};
+
+struct Parameter
+{
+    Parameter() = default;
+    Parameter(size_t           s,
+              std::string_view m)
+        :
+        mode{ m },
+        size{ s }
+    {
+    }
+    Parameter(size_t           s,
+              std::string_view m,
+              std::string_view d)
+        :
+        mode{ m },
+        size{ s },
+        display{ d }
+    {
+    }
+
+    std::string  mode;
+    size_t       size = 0;
+    std::string  display;
+};
+
+using InstructionRef = std::reference_wrapper<Instruction>;
+using ParameterRef   = std::reference_wrapper<Parameter>;
+using ConstInstructionRef = std::reference_wrapper<const Instruction>;
+using ConstParameterRef   = std::reference_wrapper<const Parameter>;
 
 
 class InstructionSet
 {
 public:
-
-    struct Instruction
+    InstructionSet() = default;
+    
+    template <std::ranges::range ParameterRangeType, std::ranges::range InstructionRangeType>
+    InstructionSet(const ParameterRangeType   &parameters,
+                   const InstructionRangeType &instructions)
     {
-        Instruction() = default;
-        explicit Instruction(size_t o,
-            const std::string &mn,
-            const std::string &mo)
-            :
-            opcode(o),
-            mnemonic(mn),
-            mode(mo)
-        {
-        }
-        explicit Instruction(size_t o,
-            const std::string &mn,
-            const std::string &mo,
-            const std::string &d)
-            :
-            opcode(o),
-            mnemonic(mn),
-            mode(mo),
-            display(d)
-        {
-        }
+        for ( const Parameter &parameter : parameters )
+            _parameters.insert_or_assign( parameter.mode, parameter );
 
-        size_t       opcode = 0;
-        std::string  mnemonic;
-        std::string  mode;
-        std::string  display;
-    };
+        for ( const Instruction &instruction : instructions )
+            _instructions.insert_or_assign( instruction.opcode, instruction );
+    }
 
-    struct Parameter
-    {
-        Parameter() = default;
-        explicit Parameter(size_t  s,
-            const std::string &m)
-            :
-            mode{ m },
-            size{ s }
-        {
-        }
-        explicit Parameter(size_t  s,
-            const std::string &m,
-            const std::string &d)
-            :
-            mode{ m },
-            size{ s },
-            display{ d }
-        {
-        }
+    bool empty() const;
 
-        std::string  mode;
-        size_t       size = 0;
-        std::string  display;
-    };
+    std::string disassemble(std::span<const std::byte> input_instruction) const;
 
-    void fetch();
-
-    std::string disassemble(const std::span<std::byte> input_instruction) const;
-
-    std::optional<std::pair<Instruction, Parameter>> retrieveInstructionData(uint8_t opcode) const;
+    std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> retrieveInstructionData(uint8_t opcode) const;
 protected:
     std::map<std::string, Parameter> _parameters;
     std::map<size_t, Instruction>    _instructions;
-
 };

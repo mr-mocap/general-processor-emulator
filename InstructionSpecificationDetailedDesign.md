@@ -1,14 +1,18 @@
 # Instruction Specification Detailed Design
+
 This document outlines the specifics of the Instruction Specification Design.
 
 ## Main Idea
+
 We will create a database-style structure for storing the information, per instruction.
 
 It will be laid out in two tables:
 * Instruction
 * Parameter
+* Registers Used By Instructions
 
 ### Instruction Table Layout
+
 The table will contain the following columns:
 * OPCODE
 * MNEMONIC
@@ -27,6 +31,7 @@ The DISPLAY will be a string that will be used as a fallback to display for the
 instruction, should there not be a more spcific one defined in the Parameter Table.
 
 ### Parameter Table Layout
+
 The table will contain the following columns:
 * MODE
 * SIZE
@@ -40,9 +45,24 @@ The SIZE will be the count of bytes *after* the opcode for this instruction mode
 The DISPLAY will contain a string that will be displayed for the complete instruction.  Said string
 can contain substitution parameters that will be substituted before displaying.
 
+### Registers Layout
+
+The table will contain the following columns:
+* NAME
+* BITS
+* DESCRIPTION
+
+The NAME will be the name of the register.
+
+The BITS will be the size of the register, in bits.
+
+The DESCRIPTION will be a short description of the register.
+
 #### DISPLAY String Substitution Patterns
+
 * %p - Represents the bytes of the instruction *after* the opcode
 
 #### Details About the DISPLAY Entry
+
 What to display for the disassembled instruction is first looked up in the Parameter Table's DISPLAY entry and
 is displayed if found.  If the entry is empty, then the DISPLAY entry in the Instruction Table is then used.

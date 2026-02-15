@@ -5,25 +5,26 @@ the Processor Specification.
 
 ## Main Idea
 
-There will be a single file that will contain all the data.
+There will be file(s) that will contain all the data.
 
-The way you specify the registers will look similar to a C-style
-struct declaration, with the keyword 'registers' marking the
-beginning of the declaration.  Each line inside will contain either
-a register name follwed by a ':' and then a bit width for the register.
+The way you specify the registers will be in a line-oriented fashion,
+with each line being a single record of a register specification.  The
+different fields of data will be separated by a single tab character
+('\t').  The first line will be the names of the record's fields.
+
+The registers specified will be the set of registers that the machine
+code assumes to exist and will affect and may or may not be directly
+addressable.
 
 ### Example Registers Specification (for 6502)
 
-    registers
-    {
-        A : 8
-        X : 8
-        Y : 8
-        Address : 16
-        Data : 8
-        ProgramCounter : 16
-        Status : 8
-    }
+NAME	BITS	DESCRIPTION
+A	8	Accumulator
+X	8	Secondary Register X
+Y	8	Secondary Register Y
+PC	16	Program Counter
+SP	8	Stack Pointer
+SR	8	Status Register
 
 ### Micro-Op Language
 
