@@ -10,6 +10,7 @@
 #include <span>
 #include <cstddef>
 #include <vector>
+#include <cassert>
 
 
 Parameter   ToParameter(const std::vector<std::string> &row_values);
@@ -24,6 +25,8 @@ std::optional<size_t> HexStringToSizeT(std::string_view input);
 template <Concept::BasicType T>
 constexpr T To(std::span<const std::byte> bytes)
 {
+    assert( bytes.size() == sizeof(T) );
+
     T result; // We do this for memory alignment of the variable type
 
     std::memcpy(&result, bytes.data(), sizeof(T));

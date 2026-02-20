@@ -2,6 +2,7 @@
 #include "Conversions.hpp"
 #include <filesystem>
 #include <fstream>
+#include <cassert>
 
 #if defined(WIN32) || defined(WIN64)
 static const std::filesystem::path DataDirectory{ std::filesystem::path("..") / ".." / ".." / "DataFiles" / "InstructionSet" };
@@ -26,6 +27,15 @@ std::filesystem::path ParameterPath(std::string_view processor_name)
 std::filesystem::path RegisterPath(std::string_view processor_name)
 {
     return DataDirectory / processor_name / RegisterFileName;
+}
+
+bool InstructionSetExists(std::string_view processor_name)
+{
+    std::filesystem::path instruction_file_path = InstructionSetPath(processor_name);
+    std::filesystem::path parameter_file_path = ParameterPath(processor_name);
+
+    return !instruction_file_path.empty() && std::filesystem::exists(instruction_file_path) &&
+           !parameter_file_path.empty()   && std::filesystem::exists(parameter_file_path);
 }
 
 bool CanMakeInstruction(const std::vector<std::string> &row_values)
@@ -59,6 +69,24 @@ std::vector<std::string> BreakLine(std::string_view input)
 
     if ( final_position < input.size() )
         retval.push_back(std::string{ input.substr(final_position) });
+    return retval;
+}
+
+std::vector<std::string_view> BreakLineView(std::string_view input)
+{
+    std::size_t final_position = 0;
+    std::vector<std::string_view> retval;
+
+    for ( std::pair<std::size_t, std::size_t> search_position = std::make_pair(0, 0);
+        (search_position.second = input.find('\t', search_position.first)) != std::string_view::npos;
+        search_position.first = search_position.second + 1, final_position = search_position.first
+        )
+    {
+        retval.push_back( input.substr(search_position.first, search_position.second - search_position.first) );
+    }
+
+    if ( final_position < input.size() )
+        retval.push_back( input.substr(final_position) );
     return retval;
 }
 
@@ -151,4 +179,16 @@ std::vector<Register> ReadRegisters(std::string_view processor_name)
     }
 
     return {};
+}
+
+InstructionSet ReadInstructionSet(std::string_view processor_name)
+{
+    assert( InstructionSetExists(processor_name) );
+
+    std::vector<Instruction> instructions = ReadInstructions( processor_name );
+    std::vector<Parameter> parameters = ReadParameters( processor_name );
+
+    if ( instructions.empty() || parameters.empty() )
+        return {}; // Error
+    return InstructionSet( parameters, instructions );
 }

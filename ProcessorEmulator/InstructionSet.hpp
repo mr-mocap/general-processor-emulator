@@ -90,10 +90,30 @@ public:
 
     bool empty() const;
 
+    /** Disassembles the given instruction into a human readable format
+     * 
+     * @param input_instruction The bytes of the instruction to disassemble
+     *
+     * @return A human readable string representing the instruction,
+     *         or an empty string if the instruction could not be disassembled
+     */
     std::string disassemble(std::span<const std::byte> input_instruction) const;
 
+    /** Assembles the given line of assembly code into machine code
+     * 
+     * @param line A line of assembly code to assemble
+     *
+     * @return The machine code bytes representing the instruction,
+     *         or an empty span if the instruction could not be assembled
+     */
+    std::u8string assemble(std::string_view line) const;
+
     std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> retrieveInstructionData(uint8_t opcode) const;
+
+    std::vector<ConstInstructionRef> findInstructions(std::string_view mnemonic) const;
+
+    const Parameter *findParameter(std::string_view mode) const;
 protected:
-    std::map<std::string, Parameter> _parameters;
-    std::map<size_t, Instruction>    _instructions;
+    std::map<std::string, Parameter, std::less<>> _parameters;
+    std::map<size_t, Instruction>                 _instructions;
 };

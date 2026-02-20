@@ -1,5 +1,7 @@
 #include "InstructionSet.hpp"
 #include "Conversions.hpp"
+#include "StringProcessing.hpp"
+#include "IO.hpp"
 #include <fstream>
 #include <vector>
 #include <array>
@@ -10,9 +12,18 @@
 #include <functional>
 #include <charconv>
 #include <format>
+#include <algorithm>
+#include <system_error>
+
 
 namespace
 {
+
+struct ParameterMatchResult
+{
+    std::vector<int> parameter_values;
+    bool             matched = false;
+};
 
     std::string LookupOpcode(const Instruction &, const Parameter &, std::span<const std::byte>);
     std::string LookupMnemonic(const Instruction &, const Parameter &, std::span<const std::byte>);
@@ -152,6 +163,35 @@ namespace
         return display_template;
     }
 
+    ParameterMatchResult DisplayMatchesPattern(std::string_view display_template, std::string_view input)
+    {
+        std::vector<int> matches;
+        std::vector<std::string_view> display_chunks = SplitString(display_template, "%p");
+
+        for (std::string_view chunk : display_chunks)
+        {
+            if ( chunk == "%p" )
+            {
+                // We need to read a number
+                ReadNumberResult result = ReadNumber(input);
+
+                if ( result.value == -1 )
+                    return {}; // No match!
+
+                matches.push_back( result.value );
+                input = result.remaining_input;
+                continue;
+            }
+
+            // Otherwise, we need to match the chunk at the front of the input.
+            if ( !input.starts_with( chunk ) )
+                return {}; // No match!
+
+            input.remove_prefix( chunk.size() );
+        }
+
+        return { matches, true };
+    }
 }
 
 bool InstructionSet::empty() const
@@ -177,6 +217,98 @@ std::string InstructionSet::disassemble(std::span<const std::byte> input_instruc
     return Decode(input_instruction, instruction_data.value().first, instruction_data.value().second, entire_instruction_display);
 }
 
+std::u8string InstructionSet::assemble(std::string_view tab_separated_line) const
+{
+    if ( tab_separated_line.empty() )
+        return {};
+    
+    // Break the line into tokens and try to match the first token to an instruction mnemonic.
+    // If we find a match, we can then try to parse the rest of the tokens as parameters,
+    // and if that succeeds, we can assemble the instruction.
+    std::vector<std::string_view> tokens = BreakLineView(tab_separated_line);
+
+    if ( tokens.empty() )
+        return {};
+
+    const std::string_view mnemonic = tokens[0];
+
+    if ( mnemonic.empty() )
+        return {};
+
+    tokens.erase(tokens.begin()); // Remove the mnemonic from the tokens, leaving only the parameters.
+
+    std::vector<ConstInstructionRef> instruction_data = findInstructions( mnemonic );
+
+    if ( instruction_data.empty() )
+        return {}; // No instruction with a matching mnemonic was found.
+
+    std::u8string assembled_instruction;
+
+    // Let's try to find an instruction with a matching parameter
+    for (const Instruction &instruction : instruction_data)
+    {
+        const Parameter *parameter = findParameter( instruction.mode );
+
+        if ( !parameter )
+            continue;
+
+        // Check for mismatch of parameter size and number of parameters provided in the input line.
+
+        if ( parameter->size == 0 && !tokens.empty() )
+            continue; // This instruction doesn't take any parameters, but we have some, so this isn't a match.
+
+        if ( parameter->size > 0 && tokens.empty() )
+            continue; // This instruction requires parameters, but we don't have any, so this isn't a match.
+
+        std::string display_template = RetrieveDisplay(instruction, *parameter); 
+
+        // Check for having a display template and an operand
+        if ( !display_template.empty() && !tokens.empty() )
+        {
+            // Possible match
+            ParameterMatchResult parameter_match_result = DisplayMatchesPattern(display_template, tokens.front());
+
+            if ( !parameter_match_result.matched )
+                continue; // The display template doesn't match the input line, so this isn't a match.
+
+            assert( parameter->mode == instruction.mode ); // This should always be true, but we want to make sure.
+
+            // Matched!
+
+            // Go ahead and put the opcode in
+            assembled_instruction.push_back( static_cast<std::uint8_t>(instruction.opcode) );
+
+            // Let's check if the parameters we matched are valid for this instruction's operand.
+            for ( int parameter_value : parameter_match_result.parameter_values )
+            {
+                if ( parameter_value >= 0 )
+                {
+                    int max_value = (1 << (parameter->size * 8)) - 1;
+
+                    if ( parameter_value > max_value )
+                        continue; // This parameter value is too large for the expected parameter size, so this isn't a match.
+
+                    // MATCH
+
+                    // Append the parameter bytes to the assembled instruction
+                    // auto bytes = std::as_bytes( std::span{ &parameter_value  } );
+                    // assembled_instruction.push_back( static_cast<std::uint8_t>( parameter_value ) );
+                }
+            }
+        }
+
+        if ( display_template.empty() && tokens.empty())
+            return std::u8string{ static_cast<std::uint8_t>(instruction.opcode) }; // MATCH
+    }
+
+    // If we get here, we have a matching instruction and parameters.
+    // std::u8string assembled_instruction;
+    // assembled_instruction.push_back(static_cast<std::uint8_t>(opcode));
+    // return assembled_instruction;
+
+    return {};
+}
+
 std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> InstructionSet::retrieveInstructionData(uint8_t opcode) const
 {
     const auto instruction_iter = _instructions.find(opcode);
@@ -191,4 +323,35 @@ std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> InstructionSet:
         return std::nullopt;
 
     return std::make_optional( std::make_pair( std::ref(i), std::ref(parameter_iter->second) ) );
+}
+
+std::vector<ConstInstructionRef> InstructionSet::findInstructions(std::string_view mnemonic) const
+{
+    std::vector<ConstInstructionRef> results;
+    size_t count = 0;
+
+    for ( const auto &[opcode, instruction] : _instructions )
+    {
+        if ( instruction.mnemonic == mnemonic )
+            count++;
+    }
+
+    results.reserve(count);
+
+    for ( const auto &[opcode, instruction] : _instructions )
+    {
+        if ( instruction.mnemonic == mnemonic )
+            results.push_back( std::cref(instruction) );
+    }
+    return results;
+}
+
+const Parameter *InstructionSet::findParameter(std::string_view mode) const
+{
+    const auto parameter_iter = _parameters.find(mode);
+
+    if ( parameter_iter == _parameters.end() )
+        return nullptr;
+
+    return &parameter_iter->second;
 }
