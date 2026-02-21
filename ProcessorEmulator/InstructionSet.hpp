@@ -9,6 +9,7 @@
 #include <span>
 #include <functional>
 #include <ranges>
+#include "Bits.hpp"
 
 
 struct Instruction
@@ -20,7 +21,8 @@ struct Instruction
         :
         opcode(o),
         mnemonic(mn),
-        mode(mo)
+        mode(mo),
+        bytes( MinBytesInRepresentation(o) )
     {
     }
     Instruction(size_t o,
@@ -31,7 +33,8 @@ struct Instruction
         opcode(o),
         mnemonic(mn),
         mode(mo),
-        display(d)
+        display(d),
+        bytes( MinBytesInRepresentation(o) )
     {
     }
 
@@ -39,6 +42,7 @@ struct Instruction
     std::string  mnemonic;
     std::string  mode;
     std::string  display;
+    size_t       bytes = 1;
 };
 
 struct Parameter
@@ -70,6 +74,8 @@ using InstructionRef = std::reference_wrapper<Instruction>;
 using ParameterRef   = std::reference_wrapper<Parameter>;
 using ConstInstructionRef = std::reference_wrapper<const Instruction>;
 using ConstParameterRef   = std::reference_wrapper<const Parameter>;
+
+using AssembledInstruction = std::vector<std::uint8_t>;
 
 
 class InstructionSet
@@ -106,7 +112,7 @@ public:
      * @return The machine code bytes representing the instruction,
      *         or an empty span if the instruction could not be assembled
      */
-    std::u8string assemble(std::string_view line) const;
+     AssembledInstruction assemble(std::string_view line) const;
 
     std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> retrieveInstructionData(uint8_t opcode) const;
 

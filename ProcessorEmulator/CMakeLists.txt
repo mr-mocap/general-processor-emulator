@@ -42,14 +42,14 @@ endif()
 
 # Add unit tests
 add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.cpp")
-add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp")
+add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.cpp" "Bits.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp")
 add_executable (test_stringprocessing "${TEST_STRINGPROCESSING_SRC}" "StringProcessing.cpp")
-add_executable (test_conversions "${TEST_CONVERSIONS_SRC}" "Conversions.cpp")
-add_executable (test_io "${TEST_IO_SRC}" "IO.cpp" "Conversions.cpp")
-add_executable (test_disassembler "${TEST_DISASSEMBLER_SRC}" "Disassembler.cpp" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp")
+add_executable (test_conversions "${TEST_CONVERSIONS_SRC}" "Conversions.cpp" "InstructionSet.cpp" "Bits.cpp" "StringProcessing.cpp" "RegisterSet.cpp")
+add_executable (test_io "${TEST_IO_SRC}" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp" "InstructionSet.cpp" "Bits.cpp" "RegisterSet.cpp")
+add_executable (test_disassembler "${TEST_DISASSEMBLER_SRC}" "Disassembler.cpp" "InstructionSet.cpp" "Bits.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp")
 
 # Add source to this project's executable.
-add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp" "Disassembler.cpp" "RegisterSet.cpp")
+add_executable (ProcessorEmulator "ProcessorEmulator.cpp" "InstructionSet.cpp" "Bits.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp" "Disassembler.cpp" "RegisterSet.cpp")
 
 # TODO: Add tests and install targets if needed.
 

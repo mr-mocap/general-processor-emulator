@@ -26,3 +26,9 @@ struct ReadNumberResult
 };
 
 ReadNumberResult ReadNumber(std::string_view input);
+
+std::vector<std::string> BreakLine(std::string_view input);
+
+std::vector<std::string_view> BreakLineView(std::string_view input);
+
+std::vector<std::string> TrimRight(std::vector<std::string> &&line);

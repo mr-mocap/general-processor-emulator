@@ -3,6 +3,52 @@
 #include <system_error>
 
 
+std::vector<std::string> BreakLine(std::string_view input)
+{
+    std::size_t final_position = 0;
+    std::vector<std::string> retval;
+
+    for ( std::pair<std::size_t, std::size_t> search_position = std::make_pair(0, 0);
+        (search_position.second = input.find('\t', search_position.first)) != std::string_view::npos;
+        search_position.first = search_position.second + 1, final_position = search_position.first
+        )
+    {
+        retval.push_back(std::string{ input.substr(search_position.first, search_position.second - search_position.first) });
+    }
+
+    if ( final_position < input.size() )
+        retval.push_back(std::string{ input.substr(final_position) });
+    return retval;
+}
+
+std::vector<std::string_view> BreakLineView(std::string_view input)
+{
+    std::size_t final_position = 0;
+    std::vector<std::string_view> retval;
+
+    for ( std::pair<std::size_t, std::size_t> search_position = std::make_pair(0, 0);
+        (search_position.second = input.find('\t', search_position.first)) != std::string_view::npos;
+        search_position.first = search_position.second + 1, final_position = search_position.first
+        )
+    {
+        retval.push_back( input.substr(search_position.first, search_position.second - search_position.first) );
+    }
+
+    if ( final_position < input.size() )
+        retval.push_back( input.substr(final_position) );
+    return retval;
+}
+
+std::vector<std::string> TrimRight(std::vector<std::string> &&line)
+{
+    if ( !line.empty() )
+    {
+        while ( line.back().empty() )
+            line.pop_back();
+    }
+    return line;
+}
+
 std::vector<std::string_view> SplitString(std::string_view input, std::string_view delimiter)
 {
     std::vector<std::string_view> result;

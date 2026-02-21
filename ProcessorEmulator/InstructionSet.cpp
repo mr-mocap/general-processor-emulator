@@ -19,6 +19,32 @@
 namespace
 {
 
+std::vector<std::uint8_t> OpcodeAsBytes(std::size_t opcode)
+{
+    const std::size_t opcode_array[1] = { opcode };
+    std::span<const std::byte> bytes = std::as_bytes( std::span{ opcode_array } );
+
+    std::vector<std::uint8_t> result;
+
+    for ( const std::byte b : bytes.first( MinBytesInRepresentation( opcode ) ) )
+        result.push_back( static_cast<std::uint8_t>(b) );
+
+    return result;
+}
+
+std::vector<std::uint8_t> ParameterAsBytes(int parameter_value)
+{
+    const int parameter_array[1] = { parameter_value };
+    std::span<const std::byte> bytes = std::as_bytes( std::span{ parameter_array } );
+
+    std::vector<std::uint8_t> result;
+
+    for ( const std::byte b : bytes.first( MinBytesInRepresentation( parameter_value ) ) )
+        result.push_back( static_cast<std::uint8_t>(b) );
+
+    return result;
+}
+
 struct ParameterMatchResult
 {
     std::vector<int> parameter_values;
@@ -217,7 +243,7 @@ std::string InstructionSet::disassemble(std::span<const std::byte> input_instruc
     return Decode(input_instruction, instruction_data.value().first, instruction_data.value().second, entire_instruction_display);
 }
 
-std::u8string InstructionSet::assemble(std::string_view tab_separated_line) const
+AssembledInstruction InstructionSet::assemble(std::string_view tab_separated_line) const
 {
     if ( tab_separated_line.empty() )
         return {};
@@ -242,7 +268,7 @@ std::u8string InstructionSet::assemble(std::string_view tab_separated_line) cons
     if ( instruction_data.empty() )
         return {}; // No instruction with a matching mnemonic was found.
 
-    std::u8string assembled_instruction;
+    AssembledInstruction assembled_instruction;
 
     // Let's try to find an instruction with a matching parameter
     for (const Instruction &instruction : instruction_data)
@@ -275,8 +301,8 @@ std::u8string InstructionSet::assemble(std::string_view tab_separated_line) cons
 
             // Matched!
 
-            // Go ahead and put the opcode in
-            assembled_instruction.push_back( static_cast<std::uint8_t>(instruction.opcode) );
+            // Go ahead and put the opcode in (as individual bytes)
+            assembled_instruction = OpcodeAsBytes( instruction.opcode );
 
             // Let's check if the parameters we matched are valid for this instruction's operand.
             for ( int parameter_value : parameter_match_result.parameter_values )
@@ -291,22 +317,23 @@ std::u8string InstructionSet::assemble(std::string_view tab_separated_line) cons
                     // MATCH
 
                     // Append the parameter bytes to the assembled instruction
-                    // auto bytes = std::as_bytes( std::span{ &parameter_value  } );
-                    // assembled_instruction.push_back( static_cast<std::uint8_t>( parameter_value ) );
+                    std::vector<std::uint8_t> parameter_bytes = ParameterAsBytes( parameter_value );
+
+                    if ( parameter_bytes.size() != parameter->size )
+                        continue; // This shouldn't happen, but if it does, we don't want to produce an incorrect assembled instruction, so this isn't a match.
+                    
+                    assembled_instruction.insert(assembled_instruction.end(),
+                                                 parameter_bytes.begin(),
+                                                 parameter_bytes.end());
                 }
             }
         }
 
         if ( display_template.empty() && tokens.empty())
-            return std::u8string{ static_cast<std::uint8_t>(instruction.opcode) }; // MATCH
+            return OpcodeAsBytes(instruction.opcode); // MATCH
     }
 
-    // If we get here, we have a matching instruction and parameters.
-    // std::u8string assembled_instruction;
-    // assembled_instruction.push_back(static_cast<std::uint8_t>(opcode));
-    // return assembled_instruction;
-
-    return {};
+    return assembled_instruction;
 }
 
 std::optional<std::pair<ConstInstructionRef, ConstParameterRef>> InstructionSet::retrieveInstructionData(uint8_t opcode) const

@@ -29,7 +29,7 @@ void AssembleEmptyLine()
 {
     InstructionSet is = Load6502InstructionSet();
 
-    std::u8string result = is.assemble( "" );
+    AssembledInstruction result = is.assemble( "" );
 
     assert( result.empty() );
 }
@@ -38,7 +38,7 @@ void AssembleInvalidInstruction()
 {
     InstructionSet is = Load6502InstructionSet();
 
-    std::u8string result = is.assemble( "invalid_instruction" );
+    AssembledInstruction result = is.assemble( "invalid_instruction" );
 
     assert( result.empty() );
 }
@@ -48,21 +48,21 @@ void AssembleValidInstruction()
     InstructionSet is = Load6502InstructionSet();
 
     {
-        std::u8string result = is.assemble( "BRK" );
+        AssembledInstruction result = is.assemble( "BRK" );
 
         assert( !result.empty() );
         assert( result.size() == 1 );
         assert( result[0] == 0x00 );
     }
 
-    // {
-    //     std::u8string result = is.assemble( "LDA\t#$01" );
+    {
+        AssembledInstruction result = is.assemble( "LDA\t#$01" );
 
-    //     assert( !result.empty() );
-    //     assert( result.size() == 2 );
-    //     assert( result[0] == 0xA9 );
-    //     assert( result[1] == 0x01 );
-    // }
+        assert( !result.empty() );
+        assert( result.size() == 2 );
+        assert( result[0] == 0xA9 );
+        assert( result[1] == 0x01 );
+    }
 }
 
 int main()

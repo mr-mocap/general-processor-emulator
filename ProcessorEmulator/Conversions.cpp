@@ -1,6 +1,7 @@
 #include "Conversions.hpp"
 #include <charconv>
 #include <cassert>
+#include <bit>
 
 
 std::optional<size_t> DecimalStringToSizeT(std::string_view input)
