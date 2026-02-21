@@ -25,6 +25,10 @@ set(TEST_DISASSEMBLER_SRC "${CMAKE_SOURCE_DIR}/test_disassembler.cpp")
 set(TEST_DISASSEMBLER_EXE "${CMAKE_BINARY_DIR}/test_disassembler")
 set(TEST_DISASSEMBLER_PASS_FILE "${CMAKE_BINARY_DIR}/test_disassembler.pass")
 
+set(TEST_STRINGPROCESSING_SRC "${CMAKE_SOURCE_DIR}/test_stringprocessing.cpp")
+set(TEST_STRINGPROCESSING_EXE "${CMAKE_BINARY_DIR}/test_stringprocessing")
+set(TEST_STRINGPROCESSING_PASS_FILE "${CMAKE_BINARY_DIR}/test_stringprocessing.pass")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_EXTENSIONS OFF)
@@ -39,6 +43,7 @@ endif()
 # Add unit tests
 add_executable (test_registerset "${TEST_REGISTERSET_SRC}" "RegisterSet.cpp")
 add_executable (test_instructionset "${TEST_INSTRUCTIONSET_SRC}" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp")
+add_executable (test_stringprocessing "${TEST_STRINGPROCESSING_SRC}" "StringProcessing.cpp")
 add_executable (test_conversions "${TEST_CONVERSIONS_SRC}" "Conversions.cpp")
 add_executable (test_io "${TEST_IO_SRC}" "IO.cpp" "Conversions.cpp")
 add_executable (test_disassembler "${TEST_DISASSEMBLER_SRC}" "Disassembler.cpp" "InstructionSet.cpp" "IO.cpp" "Conversions.cpp" "StringProcessing.cpp")
@@ -87,3 +92,11 @@ add_custom_command(
 	COMMENT "Running Disassembler unit tests"
 )
 add_custom_target(run_test_disassembler ALL DEPENDS ${TEST_DISASSEMBLER_PASS_FILE})
+
+add_custom_command(
+	OUTPUT ${TEST_STRINGPROCESSING_PASS_FILE}
+	COMMAND ${TEST_STRINGPROCESSING_EXE} && ${CMAKE_COMMAND} -E touch ${TEST_STRINGPROCESSING_PASS_FILE}
+	DEPENDS ${TEST_STRINGPROCESSING_EXE}
+	COMMENT "Running StringProcessing unit tests"
+)
+add_custom_target(run_test_stringprocessing ALL DEPENDS ${TEST_STRINGPROCESSING_PASS_FILE})

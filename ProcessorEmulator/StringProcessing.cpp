@@ -7,13 +7,14 @@ std::vector<std::string_view> SplitString(std::string_view input, std::string_vi
 {
     std::vector<std::string_view> result;
 
+#if 0
     size_t start = 0;
     size_t end = input.find(delimiter, start);
 
     while (end != std::string_view::npos)
     {
         result.push_back( input.substr(start, end - start) );
-        start = end + delimiter.length();
+        start = end + delimiter.size();
         end = input.find( delimiter, start );
     }
 
@@ -43,6 +44,26 @@ std::vector<std::string_view> SplitString(std::string_view input, std::string_vi
             result.push_back( delimiter );
         }
     }
+#else
+    for ( size_t pos = input.find(delimiter);
+          pos != std::string_view::npos;
+          pos = input.find(delimiter) )
+    {
+        if ( pos == 0 )
+        {
+            result.push_back( input.substr(0, delimiter.size()) );
+            input.remove_prefix( delimiter.size() );
+        }
+        else
+        {
+            result.push_back( input.substr(0, pos) );
+            input.remove_prefix( pos );
+        }
+    }
+
+    if ( !input.empty() )
+        result.push_back( input );
+#endif
 
     return result;
 }

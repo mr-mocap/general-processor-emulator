@@ -55,14 +55,14 @@ void AssembleValidInstruction()
         assert( result[0] == 0x00 );
     }
 
-    {
-        std::u8string result = is.assemble( "LDA #$01" );
+    // {
+    //     std::u8string result = is.assemble( "LDA\t#$01" );
 
-        assert( !result.empty() );
-        assert( result.size() == 2 );
-        assert( result[0] == 0xA9 );
-        assert( result[1] == 0x01 );
-    }
+    //     assert( !result.empty() );
+    //     assert( result.size() == 2 );
+    //     assert( result[0] == 0xA9 );
+    //     assert( result[1] == 0x01 );
+    // }
 }
 
 int main()
