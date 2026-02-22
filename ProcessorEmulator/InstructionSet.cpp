@@ -2,6 +2,7 @@
 #include "Conversions.hpp"
 #include "StringProcessing.hpp"
 #include "IO.hpp"
+#include "Bits.hpp"
 #include <fstream>
 #include <vector>
 #include <array>
@@ -18,32 +19,6 @@
 
 namespace
 {
-
-std::vector<std::uint8_t> OpcodeAsBytes(std::size_t opcode)
-{
-    const std::size_t opcode_array[1] = { opcode };
-    std::span<const std::byte> bytes = std::as_bytes( std::span{ opcode_array } );
-
-    std::vector<std::uint8_t> result;
-
-    for ( const std::byte b : bytes.first( MinBytesInRepresentation( opcode ) ) )
-        result.push_back( static_cast<std::uint8_t>(b) );
-
-    return result;
-}
-
-std::vector<std::uint8_t> ParameterAsBytes(int parameter_value)
-{
-    const int parameter_array[1] = { parameter_value };
-    std::span<const std::byte> bytes = std::as_bytes( std::span{ parameter_array } );
-
-    std::vector<std::uint8_t> result;
-
-    for ( const std::byte b : bytes.first( MinBytesInRepresentation( parameter_value ) ) )
-        result.push_back( static_cast<std::uint8_t>(b) );
-
-    return result;
-}
 
 struct ParameterMatchResult
 {
